@@ -4,9 +4,9 @@ import urllib
 import re
 import sys
 from bs4 import BeautifulSoup
-from html.parser import HTMLParser
+from sklearn.feature_extraction.text import TfidfVectorizer
 
-def preprocess_tokenize(text):
+def preprocess(text):
     soup = BeautifulSoup(text,'html.parser')
     text = soup.prettify()
     text = re.sub('<!--.*-->','',text)
@@ -14,8 +14,13 @@ def preprocess_tokenize(text):
     text=re.sub('[^0-9a-zA-Z]',' ',text)
     text=re.sub(r"\b[nbrt]\b",' ',text)
     text = re.sub("\s+",' ',text)
-    return text.split()
+    return text
+
 
 
 data = pd.read_pickle('crawler.pk1')
-data['web_page']=data['web_page'].apply(lambda x:preprocess_tokenize(x))
+data['web_page']=data['web_page'].apply(lambda x:preprocess(x))
+
+
+tfidf = TfidfVectorizer()
+tfidf.fit_transform(data['web_page'])

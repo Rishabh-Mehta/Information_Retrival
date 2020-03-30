@@ -4,6 +4,9 @@ import urllib
 import re
 import sys
 from bs4 import BeautifulSoup
+from html.parser import HTMLParser
+
+
 
 def preprocess_tokenize(text):
     soup = BeautifulSoup(text,'html.parser')

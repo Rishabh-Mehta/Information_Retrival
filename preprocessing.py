@@ -28,5 +28,5 @@ def clean(text):
     text = re.sub("\s+",' ',text)
     return text
 
-html = clean(data['web_page'][0])
+html = clean(data['web_page'][1])
 

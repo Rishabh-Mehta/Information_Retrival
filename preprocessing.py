@@ -4,6 +4,9 @@ import urllib
 import re
 import sys
 from bs4 import BeautifulSoup
+import nltk
+nltk.download('popular')
+from nltk.corpus import stopwords
 
 def preprocess_tokenize(text):
     soup = BeautifulSoup(text,'html.parser')
@@ -14,15 +17,23 @@ def preprocess_tokenize(text):
     text=re.sub(r"\b[nbrt]\b",' ',text)
     text = re.sub(r"\s+",' ',text)
     text=text.lower()
+    text = ' '.join(word for word in text.split() if word not in stopwords.words('english'))
     return text.split()
+
+def generate_inverted_index(df):
+    inv = {}
+    for i in range(len(df)):
+        for word in set(df.tokens[i]):
+            if word not in inv.keys():
+                inv[word] = [[df.index[i],pd.Series(df.tokens[i]).value_counts()[word]]]
+            elif word in inv.keys():
+                inv[word].append([df.index[i],pd.Series(df.tokens[i]).value_counts()[word]])
+    return inv
 
 
 
 
 data = pd.read_pickle('crawler.pk1')
-data['web_page']=data['web_page'].apply(lambda x:preprocess_tokenize(x))
+data['tokens']=data['web_page'].apply(lambda x:preprocess_tokenize(x))
 
-
-
-vectorizer = TfidfVectorizer()
-data_vector=vectorizer.fit_transform(data['web_page'])
+inverted_index = generate_inverted_index(data)

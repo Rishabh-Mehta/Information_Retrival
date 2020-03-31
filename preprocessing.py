@@ -32,8 +32,13 @@ def generate_inverted_index(df):
 
 
 
-
+import time 
+start = time.time()
+print("Pre processing..")
 data = pd.read_pickle('crawler.pk1')
 data['tokens']=data['web_page'].apply(lambda x:preprocess_tokenize(x))
-
+print(time.time()-start)
+start =time.time()
+print("inverted index")
 inverted_index = generate_inverted_index(data)
+print(time.time()-start)

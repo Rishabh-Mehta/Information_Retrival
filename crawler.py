@@ -14,7 +14,6 @@ def read_page(req):
             req=req[:-1]
         response = urllib.request.urlopen(req)
         content = response.getheader('Content-Type')
-        #print("   Visited",req)
         if(re.match('text/html',content) or 
         re.match('text/plain',content) or 
         re.match('text/xml',content)):
@@ -36,7 +35,6 @@ def link_extraction_canonicalization(page,response):
   links=re.finditer("<a.*?href=\"(.*?)\".*?<\/?a>",str(page))
   for link in links:
     req=link.group(1)
-    #print(req)
     req=re.sub(' ','%20',req) 
     if(re.search('/$',req)):
       req=req[:-1]
@@ -48,7 +46,6 @@ def link_extraction_canonicalization(page,response):
       if(url.__contains__(req)):
         continue
       else:
-        #print(link.group(1))
         url.append(req)
     if re.search('^\/',req):
       base=re.match('https:\/\/(.*?)uic.edu',response.geturl()).group()
@@ -72,7 +69,6 @@ def crawler(START_URL,crawl_limit):
   while(len(queue)>0 and len(visit)<crawl_limit):
     req=queue.pop(0)
     if(req in visit):
-      #print("Already checked")
       continue
     else:
       html,res=read_page(req)
@@ -97,5 +93,5 @@ print(time.time()-start)
 
 
 
-# re.sub("(\\b<(.*?)>\\b)"," ",str(html))
+
 

@@ -14,7 +14,7 @@ def preprocess_tokenize(text):
     text = soup.prettify()
     text = re.sub('<!--.*-->','',text)
     text = re.sub('<[^>]*>','',text)
-    text=re.sub('[^a-zA-Z]',' ',text)
+    text=re.sub('[^a-zA-Z0-9]',' ',text)
     text=re.sub(r"\b[nbrt]\b",' ',text)
     return text
 
@@ -25,3 +25,5 @@ vectorizer = TfidfVectorizer(stop_words=stopwords.words('english'))
 data_vector = vectorizer.fit_transform(pd.Series(data['tokens']))
 pickle.dump(vectorizer,open("./vectorizer","wb"))
 scipy.sparse.save_npz('data_vector.npz',data_vector)
+# print(data_vector.shape)
+# print(vectorizer.get_feature_names())

@@ -21,7 +21,8 @@ def preprocess_tokenize(text):
 
 data = pd.read_pickle('crawler.pk1')
 data['tokens']=data['web_page'].apply(lambda x:preprocess_tokenize(x))
-vectorizer = TfidfVectorizer(stop_words=stopwords.words('english'))
+vectorizer = TfidfVectorizer(stop_words=stopwords.words('english'),ngram_range=(1,2))
 data_vector = vectorizer.fit_transform(pd.Series(data['tokens']))
 pickle.dump(vectorizer,open("./vectorizer","wb"))
 scipy.sparse.save_npz('data_vector.npz',data_vector)
+# print(data_vector.shape)

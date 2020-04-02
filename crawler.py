@@ -14,7 +14,7 @@ def read_page(req):
             req=req[:-1]
         response = urllib.request.urlopen(req)
         content = response.getheader('Content-Type')
-        #print("Visited",req)
+        print("Visited",req)
         if(re.match('text/html',content) or 
         re.match('text/plain',content) or 
         re.match('text/xml',content)):
@@ -35,27 +35,27 @@ def link_extraction_canonicalization(page,response):
   url=[]
   links=re.finditer("<a.*?href=\"(.*?)\".*?<\/?a>",str(page))
   for link in links:
+    
     req=link.group(1)
     req=re.sub(' ','%20',req) 
     if(re.search('/$',req)):
       req=req[:-1]
-    elif(re.match('http://',req)):
+    if(re.match('http://',req)):
       req=re.sub('http://',"https://",req)
-    elif(re.search('^#',req)):
+    if(re.search('^#',req)):
       continue
-    elif re.search('^http(.*?).uic.edu(.*?)',req):
+    if re.search('^http(.*?)?.?uic.edu(.*?)',req):
       if(url.__contains__(req)):
         continue
       else:
         #print(link.group(1))
         url.append(link.group(1))
-    elif re.search('^/',link.group(1)):
-      req=re.match('https:\/\/(.*?)uic.edu',response.geturl()).group()
-      if(url.__contains__(req+link.group(1))):
+    if re.search('^/',link.group(1)):
+      base=re.match('https:\/\/(.*?)uic.edu',response.geturl()).group()
+      if(url.__contains__(base+link.group(1))):
         continue
       else:
-        url.append(req+link.group(1))
-        #print(req+link.group(1))
+        url.append(base+link.group(1))
   return url    
 
 def clean_page(text):

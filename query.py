@@ -13,7 +13,6 @@ data_vector = scipy.sparse.load_npz('data_vector.npz')
 vectorizer = pickle.load(open('vectorizer','rb'))
 data = pd.read_pickle('crawler.pk1')
 query = sys.argv[1]
-
 def retrive(q):
     q=re.sub('[^a-zA-Z]',' ',q)
     q =q.lower()

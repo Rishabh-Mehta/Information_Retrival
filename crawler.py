@@ -5,6 +5,8 @@ import urllib.error
 import re
 import sys
 import time
+import logging
+
 
 DATA_URL = 'https://cs.uic.edu'
 
@@ -44,15 +46,23 @@ def link_extraction_canonicalization(page,response):
       continue
     if re.search('^http(.*?)?.?uic.edu(.*?)',req):
       if(url.__contains__(req)):
+        
         continue
       else:
         url.append(req)
     if re.search('^\/',req):
-      base=re.match('https:\/\/(.*?)uic.edu',response.geturl()).group()
-      if(url.__contains__(base+req)):
+      
+      try:
+        base=re.match('https:\/\/(.*?)uic.edu',response.geturl()).group()
+        if(url.__contains__(base+req)):
+          
+          continue
+        else:
+          url.append(base+req)
+      except:
+
+        logging.error("Navigational Error for %s",req)
         continue
-      else:
-        url.append(base+req)
   return url    
 
 def clean_page(text):
@@ -61,6 +71,8 @@ def clean_page(text):
     return text
 
 def crawler(START_URL,crawl_limit):
+  logging.basicConfig(filename='crawler.log',level=logging.DEBUG,filemode='w')
+  logging.info("Crawler Started")
   queue=[]
   visit=[]
   html_page=[]
@@ -68,18 +80,22 @@ def crawler(START_URL,crawl_limit):
   print("Pages Crawled:..")
   while(len(queue)>0 and len(visit)<crawl_limit):
     req=queue.pop(0)
+    logging.info("Page popped from queue %s",req)
     if(req in visit):
       continue
     else:
       html,res=read_page(req)
       if(res !=0):
+        logging.debug("Page read %s %d",req,len(visit))
         html=clean_page(html)
         html_page.append(html)
         visit.append(req)
+        logging.info("%s added",req)
         queue=queue+(link_extraction_canonicalization(html,res))
-        time.sleep(1)
         sys.stdout.write("\r%d" %  len(visit)+"/"+str(crawl_limit))
         sys.stdout.flush()
+        #print(len(visit),"/",crawl_limit," ",req)
+    logging.info("-------------------------------------------")
   crawled_pages=pd.DataFrame({"page_url":visit,"web_page":html_page})
   crawled_pages.to_pickle('./crawler.pk1')
 start=time.time()

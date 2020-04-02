@@ -14,7 +14,7 @@ def preprocess_tokenize(text):
     text = soup.prettify()
     text = re.sub('<!--.*-->','',text)
     text = re.sub('<[^>]*>','',text)
-    text=re.sub('[^a-zA-Z]',' ',text)
+    text=re.sub('[^a-zA-Z0-9]',' ',text)
     text=re.sub(r"\b[nbrt]\b",' ',text)
     return text
 

@@ -14,7 +14,7 @@ def read_page(req):
             req=req[:-1]
         response = urllib.request.urlopen(req)
         content = response.getheader('Content-Type')
-        print("   Visited",req)
+        #print("   Visited",req)
         if(re.match('text/html',content) or 
         re.match('text/plain',content) or 
         re.match('text/xml',content)):

@@ -8,7 +8,9 @@ import time
 import logging
 
 
+
 DATA_URL = 'https://cs.uic.edu'
+
 
 def read_page(req):
     try:
@@ -65,10 +67,7 @@ def link_extraction_canonicalization(page,response):
         continue
   return url    
 
-def clean_page(text):
-    text=re.sub("<head>(.*?)<\/?head>"," ",str(text))
-    text=re.sub("<script>(.*?)<\/?script>"," ",str(text))
-    return text
+
 
 def crawler(START_URL,crawl_limit):
   logging.basicConfig(filename='crawler.log',level=logging.DEBUG,filemode='w')
@@ -87,7 +86,6 @@ def crawler(START_URL,crawl_limit):
       html,res=read_page(req)
       if(res !=0):
         logging.debug("Page read %s %d",req,len(visit))
-        html=clean_page(html)
         html_page.append(html)
         visit.append(req)
         logging.info("%s added",req)

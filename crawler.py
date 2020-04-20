@@ -75,9 +75,11 @@ def crawler(START_URL,crawl_limit):
   queue=[]
   visit=[]
   html_page=[]
+  page_outlinks=[]
   queue.append(START_URL)
   print("Pages Crawled:..")
   while(len(queue)>0 and len(visit)<crawl_limit):
+    outlinks=[]
     req=queue.pop(0)
     logging.info("Page popped from queue %s",req)
     if(req in visit):
@@ -89,13 +91,16 @@ def crawler(START_URL,crawl_limit):
         html_page.append(html)
         visit.append(req)
         logging.info("%s added",req)
-        queue=queue+(link_extraction_canonicalization(html,res))
+        outlinks=(link_extraction_canonicalization(html,res))
+        queue=queue+outlinks#(link_extraction_canonicalization(html,res))
+        page_outlinks.append(outlinks)
         sys.stdout.write("\r%d" %  len(visit)+"/"+str(crawl_limit))
         sys.stdout.flush()
         #print(len(visit),"/",crawl_limit," ",req)
     logging.info("-------------------------------------------")
-  crawled_pages=pd.DataFrame({"page_url":visit,"web_page":html_page})
+  crawled_pages=pd.DataFrame({"page_url":visit,"web_page":html_page,"outlink":page_outlinks})
   crawled_pages.to_pickle('./crawler.pk1')
+
 start=time.time()
 print("Web Crawler Started")
 

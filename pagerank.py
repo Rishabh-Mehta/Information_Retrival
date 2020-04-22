@@ -1,74 +1,86 @@
 import numpy as np
 import pandas as pd
-import re
 import pickle
-import scipy.sparse
-import sys
-import time
-import urllib.request
-import urllib.error
+import networkx as nx
 
+def build_graph(df):
+    web_graph = pd.DataFrame(columns=set(df['page_url']),index=set(df['page_url']))
+    web_graph = web_graph.fillna(0)
+    for i in range(len(df)):
+        for j in range(len(df['outlink'][i])):
+            web_graph[df['page_url'][i]][df['outlink'][i][j]] += 1
+    return web_graph
 
-def read_page(req):
-    try:
-        if(re.search('/$',req)):
-            req=req[:-1]
-        response = urllib.request.urlopen(req)
-        content = response.getheader('Content-Type')
-        if(re.match('text/html',content) or 
-        re.match('text/plain',content) or 
-        re.match('text/xml',content)):
-          return response.read(),response
-        else:
-          return 0,0
-    except urllib.error.HTTPError as e:
-        #print('Error code: ', e.code,req)
-        return 0,0
-    except urllib.error.URLError as e:
-        #print('Error code: ', e.reason,req)
-        return 0,0
-    except :
-        #print ("Error",sys.exc_info()[0])
-        return 0,0
+# def initialize_page_rank(web_graph):
+#     n=len(graph.index)
+#     links=list(web_graph.index)
+#     initial= [1/n]*n
+#     S={links[i]:initial[i] for i in range(len(links))}
+#     return S
 
-def link_extraction_canonicalization(page,response):
-  url=[]
-  links=re.finditer("<a.*?href=\"(.*?)\".*?<\/?a>",str(page))
-  for link in links:
-    req=link.group(1)
-    req=re.sub(' ','%20',req) 
-    if(re.search('/$',req)):
-      req=req[:-1]
-    if(re.match('http://',req)):
-      req=re.sub('http://',"https://",req)
-    if(re.search('^#',req)):
-      continue
-    if re.search('^http(.*?)?.?uic.edu(.*?)',req):
-      if(url.__contains__(req)):
-        
-        continue
-      else:
-        url.append(req)
-    if re.search('^\/',req):
-      
-      try:
-        base=re.match('https:\/\/(.*?)uic.edu',response.geturl()).group()
-        if(url.__contains__(base+req)):
-          
-          continue
-        else:
-          url.append(base+req)
-      except:
+# def adjacent_element(doc_list):
+#     doc_list=list(doc_list.index[doc_list>0])
+#     return doc_list
 
-        logging.error("Navigational Error for %s",req)
-        continue
-  return url
-
-
-
-
+# def page_rank(web_graph,alpha,S):
+#     n=len(web_graph)
+#     links=list(web_graph.index)
+#     initial= [1/n]*n
+#     for i in range(len(web_graph)):
+#       adj_j=[]
+#       sum=0
+#       adj_j=adjacent_element(web_graph.loc[links[i]])
+#       for word in adj_j:
+#         adj_k=[]
+#         adj_k=adjacent_element(web_graph.loc[word])
+#         denominator=1
+#         for k in adj_k:
+#           denominator+=web_graph[word][k]
+#         sum+=alpha*(web_graph[links[i]][word]/denominator)*S[word] + ((1-alpha)*(1/n))
+#       if sum!=0 and np.logical_not(np.isnan(sum)):
+#         S[links[i]]=sum      
+#     return S
 
 data = pd.read_pickle('crawler.pk1')
 
-web_graph = pd.DataFrame(columns=set(data['page_url']),index=set(data['page_url']))
-web_graph = web_graph.fillna(0)
+print("Restricting page outlinks to scraped sites..")
+data['outlink']= data['outlink'].apply(lambda x: [link for link in x if link in list(data['page_url'])])
+
+
+
+print("Building Web Graph..")
+graph = build_graph(data)
+
+
+
+# print("Initializing Page rank..")
+# rank = initialize_page_rank(graph)
+
+
+
+# start = time.time()
+# print("Calculating Page rank..")
+# old = rank.copy()
+# j=0
+# update=page_rank(graph,0.85,rank)
+# print("Running Page rank convergence..")
+# while(update!=old and j<9):
+#     j=j+1
+#     print("iteration ",j,"..")
+#     old=update.copy()
+#     update=page_rank(graph,0.85,update)
+# rank_f = update
+# print(time.time() - start)
+
+
+
+
+#Running page rank from networkx to avoid longer running time for page rank to converge 
+
+print("Calculating Page rank..")
+graph_np = graph.to_numpy()
+nxgraph=nx.from_numpy_matrix(graph_np)
+rank=nx.pagerank(nxgraph)
+ind = list(graph.index)
+page_rank = {k:v for k,v in zip(ind,list(rank.values()))}
+pickle.dump(page_rank,open("./page_rank","wb"))

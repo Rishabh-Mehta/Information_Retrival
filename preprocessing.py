@@ -19,7 +19,7 @@ def preprocess_tokenize(text):
 
 data = pd.read_pickle('crawler.pk1')
 data['cleaned']=data['web_page'].apply(lambda x:preprocess_tokenize(x))
-vectorizer = TfidfVectorizer(stop_words=stopwords.words('english'))
+vectorizer = TfidfVectorizer(stop_words=stopwords.words('english'),sublinear_tf=True)
 data_vector = vectorizer.fit_transform(pd.Series(data['cleaned']))
 pickle.dump(vectorizer,open("./vectorizer","wb"))
 scipy.sparse.save_npz('data_vector.npz',data_vector)

@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import urllib.request
 import urllib.error
+from urllib.parse import urlparse
 import re
 import sys
 import time
@@ -85,7 +86,8 @@ def crawler(START_URL,crawl_limit):
     if(req in visit):
       continue
     else:
-      html,res=read_page(req)
+      if re.search('uic.edu',urlparse(req).hostname):
+        html,res=read_page(req)
       if(res !=0):
         logging.debug("Page read %s %d",req,len(visit))
         html_page.append(html)

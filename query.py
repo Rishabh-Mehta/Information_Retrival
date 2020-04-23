@@ -14,8 +14,8 @@ data_vector = scipy.sparse.load_npz('data_vector.npz')
 vectorizer = pickle.load(open('vectorizer','rb'))
 page_rank = pickle.load(open('page_rank','rb'))
 data = pd.read_pickle('crawler.pk1')
-#query = sys.argv[1]
-query="oncampus job"
+query = sys.argv[1]
+
 
 def retrive(q):
     q =q.lower()
@@ -24,7 +24,6 @@ def retrive(q):
     retrival = []
     for i in range(data_vector.shape[0]):
         if(np.any(np.logical_and(q.toarray(),data_vector[i].toarray()))):
-        
             match = set(q.nonzero()[1]) & set(data_vector[i].nonzero()[1]) 
             mismatch = set(q.nonzero()[1]) - set(data_vector[i].nonzero()[1])
             sim = (data_vector[i].dot(q.T)).toarray()/ scipy.sparse.linalg.norm(data_vector[i]) + page_rank[data.page_url[i]]
@@ -33,7 +32,7 @@ def retrive(q):
         print("Query does not match any documents")
         sys.exit()
     retrival.sort(key=lambda x:x[1],reverse=True)
-    return retrival
+    return retrival[0:20]
 
 def matched_words(Result,k):
     for R in Result:

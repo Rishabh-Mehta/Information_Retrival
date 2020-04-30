@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import urllib.request
 import urllib.error
+from urllib.parse import urlparse
 import re
 import sys
 import time
@@ -36,6 +37,7 @@ def read_page(req):
 
 def link_extraction_canonicalization(page,response):
   url=[]
+  out=[]
   links=re.finditer("<a.*?href=\"(.*?)\".*?<\/?a>",str(page))
   for link in links:
     req=link.group(1)
@@ -48,24 +50,26 @@ def link_extraction_canonicalization(page,response):
       continue
     if re.search('^http(.*?)?.?uic.edu(.*?)',req):
       if(url.__contains__(req)):
-        
+        out.append(req)
         continue
       else:
         url.append(req)
+        out.append(req)
     if re.search('^\/',req):
       
       try:
         base=re.match('https:\/\/(.*?)uic.edu',response.geturl()).group()
         if(url.__contains__(base+req)):
-          
+          out.append(req)
           continue
         else:
           url.append(base+req)
+          out.append(req)
       except:
 
         logging.error("Navigational Error for %s",req)
         continue
-  return url    
+  return url,out    
 
 
 
@@ -80,19 +84,21 @@ def crawler(START_URL,crawl_limit):
   print("Pages Crawled:..")
   while(len(queue)>0 and len(visit)<crawl_limit):
     outlinks=[]
+    temp=[]
     req=queue.pop(0)
     logging.info("Page popped from queue %s",req)
     if(req in visit):
       continue
     else:
-      html,res=read_page(req)
+      if re.search('uic.edu',urlparse(req).hostname):
+        html,res=read_page(req)
       if(res !=0):
         logging.debug("Page read %s %d",req,len(visit))
         html_page.append(html)
         visit.append(req)
         logging.info("%s added",req)
-        outlinks=(link_extraction_canonicalization(html,res))
-        queue=queue+outlinks#(link_extraction_canonicalization(html,res))
+        temp,outlinks=(link_extraction_canonicalization(html,res))
+        queue=queue+temp#(link_extraction_canonicalization(html,res))
         page_outlinks.append(outlinks)
         sys.stdout.write("\r%d" %  len(visit)+"/"+str(crawl_limit))
         sys.stdout.flush()

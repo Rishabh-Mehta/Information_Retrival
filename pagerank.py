@@ -80,7 +80,12 @@ graph = build_graph(data)
 print("Calculating Page rank..")
 graph_np = graph.to_numpy()
 nxgraph=nx.from_numpy_matrix(graph_np)
-rank=nx.pagerank(nxgraph)
 ind = list(graph.index)
-page_rank = {k:v for k,v in zip(ind,list(rank.values()))}
-pickle.dump(page_rank,open("./page_rank","wb"))
+labels = {i:ind[i] for i in range(len(ind))}
+nxgraph = nx.relabel_nodes(nxgraph,labels)
+
+rank=nx.pagerank(nxgraph)
+
+
+#page_rank = {k:v for k,v in zip(ind,list(rank.values()))}
+pickle.dump(rank,open("./page_rank","wb"))

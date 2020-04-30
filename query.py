@@ -26,13 +26,33 @@ def retrive(q):
         if(np.any(np.logical_and(q.toarray(),data_vector[i].toarray()))):
             match = set(q.nonzero()[1]) & set(data_vector[i].nonzero()[1]) 
             mismatch = set(q.nonzero()[1]) - set(data_vector[i].nonzero()[1])
-            sim = (data_vector[i].dot(q.T)).toarray()/ scipy.sparse.linalg.norm(data_vector[i]) + page_rank[data.page_url[i]]
-            retrival.append([data.page_url[i],sim,match,mismatch])        
+            sim=(data_vector[i].dot(q.T)).toarray()/ scipy.sparse.linalg.norm(data_vector[i])
+            pagerank=page_rank[data.page_url[i]]
+            netscore = sim +pagerank
+            retrival.append([data.page_url[i],netscore,match,mismatch,sim,pagerank,i])        
     if retrival == []:
         print("Query does not match any documents")
         sys.exit()
     retrival.sort(key=lambda x:x[1],reverse=True)
-    return retrival[0:20]
+    query_expansion = pseudo_relevance(retrival,10,q)
+    return retrival[0:20],query_expansion
+
+def pseudo_relevance(result,k,q):
+    result.sort(key=lambda x:x[4],reverse=True)
+    result = result[:k]
+    rel_index=[item[6] for item in result]
+    relevant_vector=np.zeros(data_vector.shape[1])
+    non_relevant_vector=(scipy.sparse.csr_matrix.sum(data_vector.T,axis=1)).T
+    for i in rel_index:
+        relevant_vector +=data_vector[i]
+    relevant_vector = 0.75*(relevant_vector / k)
+    non_relevant_vector -=relevant_vector
+    non_relevant_vector = 0.15*(non_relevant_vector / (data_vector.shape[0]-k))
+    q_new = q + relevant_vector + non_relevant_vector
+    q_opt = (np.argsort(-q_new)).T[:5]
+    query_exp = query_expansion(q_opt)
+    return query_exp
+     
 
 def matched_words(Result,k):
     for R in Result:
@@ -41,12 +61,19 @@ def matched_words(Result,k):
             match[i] = vectorizer.get_feature_names()[match[i]]
         R[k] = match
     return Result
+def query_expansion(q):
+    query=''
+    for i in list(q):
+        query += ' '+vectorizer.get_feature_names()[int(i)]
+    return query 
 
-result = retrive(query)
+    
+result,new_query = retrive(query)
 result = matched_words(result,2)
 result = matched_words(result,3)
 
-result = pd.DataFrame(result,columns=["URL","Similarity","Matched Words","Unmatched Words"])
+result = pd.DataFrame(result,columns=["URL","Net Score","Matched Words","Unmatched Words","Similarity","Page Rank","Doc Id"])
+print("Query Expansion ",new_query)
 print(result)
 print(time.time()-start)
 

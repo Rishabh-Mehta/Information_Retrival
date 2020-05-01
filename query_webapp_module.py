@@ -22,8 +22,10 @@ def retrive(q):#,data,data_vector,vectorizer,page_rank):
     q=' '.join(w for w in q.split() if not w in stopwords.words('english'))
     q=vectorizer.transform([q])
     retrival = []
+    count =0
     for i in range(data_vector.shape[0]):
         if(np.any(np.logical_and(q.toarray(),data_vector[i].toarray()))):
+            count += 1
             match = set(q.nonzero()[1]) & set(data_vector[i].nonzero()[1]) 
             mismatch = set(q.nonzero()[1]) - set(data_vector[i].nonzero()[1])
             sim=(data_vector[i].dot(q.T)).toarray()/ scipy.sparse.linalg.norm(data_vector[i])
@@ -36,7 +38,7 @@ def retrive(q):#,data,data_vector,vectorizer,page_rank):
     else:
         retrival.sort(key=lambda x:x[1],reverse=True)
         query_expansion = pseudo_relevance(retrival,10,q)#,data_vector)
-        return retrival[0:20],query_expansion
+        return retrival[0:20],query_expansion,count
 
 def pseudo_relevance(result,k,q):#,data_vector):
     result.sort(key=lambda x:x[4],reverse=True)

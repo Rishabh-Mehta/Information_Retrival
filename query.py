@@ -22,8 +22,10 @@ def retrive(q):
     q=' '.join(w for w in q.split() if not w in stopwords.words('english'))
     q=vectorizer.transform([q])
     retrival = []
+    count =0
     for i in range(data_vector.shape[0]):
         if(np.any(np.logical_and(q.toarray(),data_vector[i].toarray()))):
+            count +=1
             match = set(q.nonzero()[1]) & set(data_vector[i].nonzero()[1]) 
             mismatch = set(q.nonzero()[1]) - set(data_vector[i].nonzero()[1])
             sim=(data_vector[i].dot(q.T)).toarray()/ scipy.sparse.linalg.norm(data_vector[i])
@@ -33,9 +35,10 @@ def retrive(q):
     if retrival == []:
         print("Query does not match any documents")
         sys.exit()
+    print(count)
     retrival.sort(key=lambda x:x[1],reverse=True)
     query_expansion = pseudo_relevance(retrival,10,q)
-    return retrival[0:20],query_expansion
+    return retrival,query_expansion,count
 
 def pseudo_relevance(result,k,q):
     result.sort(key=lambda x:x[4],reverse=True)
@@ -68,12 +71,13 @@ def query_expansion(q):
     return query 
 
     
-result,new_query = retrive(query)
+result,new_query,result_count = retrive(query)
 result = matched_words(result,2)
 result = matched_words(result,3)
 
 result = pd.DataFrame(result,columns=["URL","Net Score","Matched Words","Unmatched Words","Similarity","Page Rank","Doc Id"])
 print("Query Expansion ",new_query)
+print("Results retrived ",result_count)
 print(result)
 print(time.time()-start)
 

@@ -32,9 +32,11 @@ def preprocess(text):
 data = pd.read_pickle('crawler.pk1')
 data['web_page'] = data['web_page'].apply(lambda x:x.decode('latin-1'))
 data.web_page = data.page_url + data.web_page
+print("Preprocessing...")
 data['cleaned']=data['web_page'].apply(lambda x:preprocess(x))
 vectorizer = TfidfVectorizer(stop_words=stopwords.words('english'),sublinear_tf=True,strip_accents='unicode')
-data_vector = vectorizer.fit_transform(pd.Series(data['web_page']))
+print("Vectorizing..")
+data_vector = vectorizer.fit_transform(pd.Series(data['cleaned']))
 pickle.dump(vectorizer,open("./vectorizer","wb"))
 scipy.sparse.save_npz('data_vector.npz',data_vector)
 

@@ -8,6 +8,7 @@ import time
 from nltk.corpus import stopwords
 np.seterr(divide='ignore', invalid='ignore')
 np.set_printoptions(threshold=sys.maxsize)
+from nltk.stem import WordNetLemmatizer
 
 start = time.time()
 data_vector = scipy.sparse.load_npz('data_vector.npz')
@@ -15,11 +16,11 @@ vectorizer = pickle.load(open('vectorizer','rb'))
 page_rank = pickle.load(open('page_rank','rb'))
 data = pd.read_pickle('crawler.pk1')
 query = sys.argv[1]
-
+lemma = WordNetLemmatizer()
 
 def retrive(q):
     q =q.lower()
-    q=' '.join(w for w in q.split() if not w in stopwords.words('english'))
+    q=' '.join(lemma.lemmatize(w) for w in q.split() if not w in stopwords.words('english'))
     q=vectorizer.transform([q])
     retrival = []
     count =0
@@ -38,7 +39,7 @@ def retrive(q):
     print(count)
     retrival.sort(key=lambda x:x[1],reverse=True)
     query_expansion = pseudo_relevance(retrival,10,q)
-    return retrival,query_expansion,count
+    return retrival[0:30],query_expansion,count
 
 def pseudo_relevance(result,k,q):
     result.sort(key=lambda x:x[4],reverse=True)

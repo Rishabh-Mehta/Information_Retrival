@@ -79,7 +79,7 @@ result = matched_words(result,3)
 result = pd.DataFrame(result,columns=["URL","Net Score","Matched Words","Unmatched Words","Similarity","Page Rank","Doc Id"])
 print("Query Expansion ",new_query)
 print("Results retrived ",result_count)
-print(result)
+print(result[['URL','Matched Words','Unmatched Words']].to_string())
 print(time.time()-start)
 
 

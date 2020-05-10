@@ -10,7 +10,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import html
 from nltk.stem import WordNetLemmatizer
 from bs4 import BeautifulSoup
-
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
 
 lemma = WordNetLemmatizer()
 
@@ -39,4 +40,4 @@ print("Vectorizing..")
 data_vector = vectorizer.fit_transform(pd.Series(data['cleaned']))
 pickle.dump(vectorizer,open("./vectorizer","wb"))
 scipy.sparse.save_npz('data_vector.npz',data_vector)
-
+print("Completed..")

@@ -110,7 +110,7 @@ def crawler(START_URL,crawl_limit):
 start=time.time()
 print("Web Crawler Started")
 
-crawler(DATA_URL,3500)
+crawler(DATA_URL,6000)
 print("Completed...")
 print("File created...")
 print(time.time()-start)

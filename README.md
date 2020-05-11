@@ -56,7 +56,7 @@ The page will also display a query expansion result it also displays top 30 resu
 
 To view web app for this project visit [https://irwebapp-heroku.herokuapp.com/]
 
-##Author 
+## Author 
 Rishabh Mehta 
 
 

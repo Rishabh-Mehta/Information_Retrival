@@ -52,7 +52,7 @@ Navigate to ..\Information_Retrival and run the following command
 Once the program is executed , the console will display the  search results for the query.
 The page will also display a query expansion result it also displays top 30 results.
 
-### Additional Resources console app
+### Additional Resources web app
 
 To view web app for this project visit [https://irwebapp-heroku.herokuapp.com/]
 

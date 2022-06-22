@@ -1,6 +1,6 @@
 Django==2.2.12
 nltk==3.4.5
-numpy==1.18.1
+numpy==1.22.0
 pandas==1.0.3
 pip==20.0.2
 py==1.8.1
